@@ -1,0 +1,26 @@
+[tool.poetry]
+name = "fastapi-query"
+version = "0.1.0"
+description = ""
+authors = ["Lazar Stamenkovic <lazarstamenkovic96@hotmail.com>"]
+readme = "README.md"
+packages = [{include = "fastapi_query"}]
+
+[tool.poetry.dependencies]
+python = ">=3.8,<4.0"
+fastapi = ">=0.78,<1.0"
+pydantic = ">=2.0.0,<3.0.0"
+sqlalchemy = {version = ">=1.4.36,<3.0.0", optional = true}
+mongoengine = {version = ">=0.24.1,<0.30.0", optional = true}
+uvicorn = "^0.23.2"
+
+
+[tool.poetry.extras]
+mongoengine = ["mongoengine"]
+sqlalchemy = ["sqlalchemy"]
+all = ["mongoengine", "sqlalchemy"]
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
