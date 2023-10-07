@@ -1,4 +1,4 @@
-from typing import Type, TypeVar
+from typing import Type, TypeVar, Optional
 from typing_extensions import Annotated
 
 from fastapi import Depends
@@ -11,17 +11,31 @@ FilterParamsType = TypeVar('FilterParamsType', bound=BaseFilterParams)
 
 def Filter( # noqa
         model: Type[FilterParamsType]
-):
+) -> FilterParamsType:
+    """
+    Filter Dependency
+
+    Parameters:
+        model (Type[BaseFilterParams]): Filter Params Schema
+
+    Returns:
+        dependency_result (BaseFilterParams): Filter Object
+    """
     fields = flatten_filter_fields(model)
+
     GeneratedFilterModel: Type[BaseFilterParams] = create_model( # noqa
         model.__class__.__name__,
         **fields
     )
 
-    def func(
+    def wrapped_func(
             inner_filters: Annotated[GeneratedFilterModel, Depends(GeneratedFilterModel)]
-    ):
-        values = inner_filters.model_dump()
-        return pack_values(filter_class=model, values=values)
+    ) -> FilterParamsType:
 
-    return Depends(func)
+        values = inner_filters.model_dump()
+        return pack_values(
+            filter_class=model,
+            values=values
+        )
+
+    return Depends(wrapped_func)

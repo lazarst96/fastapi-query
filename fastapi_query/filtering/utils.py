@@ -26,7 +26,7 @@ def check_optional_type(tp: Type) -> bool:
     return (
             origin in (Union, types.UnionType) and
             len(args) == 2 and
-            args[-1] == types.NoneType
+            args[-1] == type(None)
     )
 
 

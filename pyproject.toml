@@ -21,6 +21,9 @@ sqlalchemy = ["sqlalchemy"]
 all = ["mongoengine", "sqlalchemy"]
 
 
+[tool.poetry.group.dev.dependencies]
+psycopg2 = "^2.9.7"
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"

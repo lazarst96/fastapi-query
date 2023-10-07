@@ -2,8 +2,9 @@ from typing import List, Optional, Type
 
 from pydantic import BaseModel, model_validator
 
+from .enums import FilterOperators
 
-OPERATORS_WITH_SEQ_ARG = {'in', 'not_in'}
+OPERATORS_WITH_SEQ_ARG = {FilterOperators.IN, FilterOperators.NIN}
 
 
 class BaseFilterParams(BaseModel):
@@ -12,7 +13,6 @@ class BaseFilterParams(BaseModel):
     def parse_raw_values(cls, values):
 
         res = {}
-        # print("Model", values)
 
         for field, value in values.items():
             if (
@@ -29,6 +29,7 @@ class BaseFilterParams(BaseModel):
 
     class Config:
         prefix: Optional[str] = None
+        search_field: str = 'search'
         searchable_fields: List[str] = []
 
 

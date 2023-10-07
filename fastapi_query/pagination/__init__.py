@@ -2,16 +2,12 @@ from .deps import Paginate
 from .schemas import (
     Paginated,
     PaginatedMeta,
-    PageParams,
-    LimitOffsetParams,
-    CursorParams
+    PaginationParams
 )
 
 __all__ = [
     "Paginate",
     "Paginated",
     "PaginatedMeta",
-    "PageParams",
-    "LimitOffsetParams",
-    "CursorParams"
+    "PaginationParams"
 ]
