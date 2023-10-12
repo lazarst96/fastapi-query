@@ -52,4 +52,6 @@ jobs:
         run: poetry install --no-interaction --extras all
 
       - name: Run Tests
-        run: pytest run tests -q --cov-report=xml
+        run: |
+          source .venv/bin/activate
+          pytest tests -q
