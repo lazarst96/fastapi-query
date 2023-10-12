@@ -1,7 +1,8 @@
 from dataclasses import dataclass
-from typing import Literal, Any, Dict, Type, Annotated, Tuple, Union, List
+from typing import Any, Dict, Type
+from typing_extensions import Annotated, Literal
 
-from pydantic import BaseModel, ValidationError
+from pydantic import BaseModel
 from pydantic.version import VERSION as PYDANTIC_VERSION
 
 PYDANTIC_V2 = PYDANTIC_VERSION.startswith("2.")
@@ -14,6 +15,7 @@ if PYDANTIC_V2:
 
     Undefined = PydanticUndefined
     UndefinedType = PydanticUndefinedType
+
 
     @dataclass
     class ModelField:
@@ -53,6 +55,7 @@ if PYDANTIC_V2:
             # ModelField to its JSON Schema.
             return id(self)
 
+
     def _get_model_fields(
             model: Type[BaseModel]
     ) -> Dict[str, ModelField]:
@@ -64,12 +67,14 @@ if PYDANTIC_V2:
             ) for name, field_info in model.model_fields.items()
         }
 
+
     def _model_dump(
             model: BaseModel,
             mode: Literal["json", "python"] = "json",
             **kwargs: Any
     ) -> Any:
         return model.model_dump(mode=mode, **kwargs)
+
 
     def _validate(
             model: Type[BaseModel],
@@ -84,11 +89,13 @@ if PYDANTIC_V2:
     ) -> classmethod:
         return model_validator(*args, mode=mode)  # noqa
 
+
     def _is_model_field_required(field: FieldInfo) -> bool:
         return field.is_required()
 else:
     from pydantic import root_validator
     from pydantic.fields import ModelField
+
 
     def _get_model_fields(
             model: Type[BaseModel]
@@ -103,6 +110,7 @@ else:
     ) -> Any:
         return model.dict(**kwargs)
 
+
     def _validate(
             model: Type[BaseModel],
             value: Any
@@ -115,6 +123,7 @@ else:
             mode: Literal["before", "after"] = "before"
     ) -> classmethod:
         return root_validator(*args, pre=mode == "before")  # noqa
+
 
     def _is_model_field_required(field: ModelField) -> bool:
         return field.required
