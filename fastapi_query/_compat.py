@@ -4,8 +4,17 @@ from typing_extensions import Annotated, Literal
 
 from pydantic import BaseModel
 from pydantic.version import VERSION as PYDANTIC_VERSION
+import sys
+import types
 
 PYDANTIC_V2 = PYDANTIC_VERSION.startswith("2.")
+
+
+if sys.version.startswith("3.8.") or sys.version.startswith("3.9."):
+    UnionType = types.Union # noqa
+else:
+    UnionType = types.UnionType
+
 
 if PYDANTIC_V2:
     from pydantic import model_validator
@@ -130,6 +139,7 @@ else:
 
 __all__ = [
     "PYDANTIC_V2",
+    "UnionType",
     "_model_dump",
     "_model_validator",
     "_get_model_fields",
