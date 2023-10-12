@@ -1,7 +1,7 @@
-from typing import Any, Optional, List, Dict
+from typing import Any, Optional, List, Dict, Union
 
 from sqlalchemy import Select, inspect
-from sqlalchemy.orm import Relationship
+from sqlalchemy.orm import Relationship, Query
 
 
 def _get_field(
@@ -44,19 +44,19 @@ def _get_field(
 
 def apply_ordering(
         model_class: Any,
-        stmt: Select,
+        stmt: Union[Select, Query],
         order_by: Optional[str]
-) -> Select:
+) -> Union[Select, Query]:
     """
     Function for applying order by on the query object
 
     Parameters:
         model_class (Any): SQLAlchemy Model Class
-        stmt (Select): Pre-constructed Select Statement
+        stmt (Union[Select, Query]): Pre-constructed Select Statement
         order_by (Optional[str]): Comma-separated fields / field-paths
 
     Returns:
-        result_stmt (Select): Result Statement
+        result_stmt (Union[Select, Query]): Result Statement
     """
 
     if not order_by:

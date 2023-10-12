@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 
 from sqlalchemy import Select, and_, Column, or_
 from sqlalchemy.inspection import inspect
@@ -151,19 +151,19 @@ def _get_orm_filters(
 
 def apply_filters(
         model_class: Any,
-        stmt: Select | Query,
+        stmt: Union[Select, Query],
         filters: Optional[BaseFilterParams]
-) -> Select | Query:
+) -> Union[Select, Query]:
     """
     Function for applying filters to the query object
 
     Parameters:
         model_class (Any): SQLAlchemy Model Class
-        stmt (Select): Pre-constructed Select Statement
+        stmt (Union[Select, Query]): Pre-constructed Select Statement
        filters (BaseFilterParams): Comma-separated fields / field-paths
 
     Returns:
-        result_stmt (Select): Result Statement
+        result_stmt (Union[Select, Query]): Result Statement
     """
 
     if not filters:

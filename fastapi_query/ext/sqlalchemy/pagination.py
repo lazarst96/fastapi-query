@@ -1,8 +1,8 @@
-from typing import Any, TypeVar, Dict, Optional
+from typing import Any, TypeVar, Dict, Optional, Union
 
 from sqlalchemy import Select, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, Query
 
 from fastapi_query.filtering import BaseFilterParams
 from fastapi_query.pagination.schemas import PaginationParams
@@ -35,7 +35,7 @@ def _paginate_query_with_page(
 
 def paginate(
         db: Session,
-        stmt: Select,
+        stmt: Union[Select, Query],
         pagination_params: PaginationParams,
         model_class: Optional[Any] = None,
         filter_params: Optional[BaseFilterParams] = None,
@@ -46,7 +46,7 @@ def paginate(
 
     Parameters:
         db (Session): SQLAlchemy Active Session
-        stmt (Select): Pre-constructed Select Statement
+        stmt (Union[Select, Query]): Pre-constructed Select Statement
         pagination_params (PaginationParams): Pagination Params
         model_class (Optional[Any]): SQLAlchemy Model Class
         filter_params (Optional[BaseFilterParams]): Filtering Params
@@ -98,7 +98,7 @@ def paginate(
 
 async def paginate_async(
         db: AsyncSession,
-        stmt: Select,
+        stmt: Union[Select, Query],
         pagination_params: PaginationParams,
         model_class: Optional[Any] = None,
         filter_params: Optional[BaseFilterParams] = None,
@@ -109,7 +109,7 @@ async def paginate_async(
 
     Parameters:
         db (AsyncSession): SQLAlchemy Async Active Session
-        stmt (Select): Pre-constructed Select Statement
+        stmt (Union[Select, Query]): Pre-constructed Select Statement
         pagination_params (PaginationParams): Pagination Params
         model_class (Optional[Any]): SQLAlchemy Model Class
         filter_params (Optional[BaseFilterParams]): Filtering Params
