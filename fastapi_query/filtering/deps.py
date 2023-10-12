@@ -1,15 +1,17 @@
 from typing import Type, TypeVar
-from typing_extensions import Annotated
 
 from fastapi import Depends
 from pydantic import create_model
+from typing_extensions import Annotated
 
+from fastapi_query._compat import _model_dump
 from .base_params import BaseFilterParams
 from .utils import flatten_filter_fields, pack_values
 
 FilterParamsType = TypeVar("FilterParamsType", bound=BaseFilterParams)
 
-def Filter( # noqa
+
+def Filter(  # noqa
         model: Type[FilterParamsType]
 ) -> FilterParamsType:
     """
@@ -33,8 +35,7 @@ def Filter( # noqa
     def wrapped_func(
             inner_filters: InnerFilters
     ) -> FilterParamsType:
-
-        values = inner_filters.model_dump()
+        values = _model_dump(inner_filters)
         return pack_values(
             filter_class=model,
             values=values

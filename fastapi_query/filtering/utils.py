@@ -1,5 +1,6 @@
 import inspect
 import types
+from collections import deque
 from copy import deepcopy
 from typing import (
     Type,
@@ -10,14 +11,40 @@ from typing import (
     Iterable,
     get_origin,
     get_args,
-    Any
+    Any,
+    Sequence,
+    List,
+    Set,
+    FrozenSet,
+    Deque
 )
 
 from fastapi.exceptions import RequestValidationError
 from pydantic import ValidationError
 from pydantic.fields import FieldInfo
 
+from fastapi_query._compat import (
+    _get_model_fields,
+    _validate
+)
 from .base_params import BaseFilterParams
+
+
+sequence_annotation_to_type = {
+    Sequence: list,
+    List: list,
+    list: list,
+    Tuple: tuple,
+    tuple: tuple,
+    Set: set,
+    set: set,
+    FrozenSet: frozenset,
+    frozenset: frozenset,
+    Deque: deque,
+    deque: deque,
+}
+
+sequence_types = tuple(sequence_annotation_to_type.keys())
 
 
 def check_optional_type(tp: Type) -> bool:
@@ -72,7 +99,6 @@ def check_sequence_type(
     Returns:
         val (bool): Value determines whether provided type is sequence type or not
     """
-    sequence_types = [list, set, frozenset, tuple]
     origin = get_origin(tp)
     args = get_args(tp)
 
@@ -130,17 +156,18 @@ def flatten_filter_fields(
     """
 
     ret = {}
+    model_fields = _get_model_fields(filter_class)
 
-    for field_name, info in filter_class.model_fields.items():
-        field_info = deepcopy(info)
+    for field_name, f in model_fields.items():
+        field_info = deepcopy(f.field_info)
 
-        field_type = filter_class.__annotations__.get(field_name, field_info.annotation)
+        field_type = filter_class.__annotations__.get(field_name, f.type_)
 
-        if check_sequence_type(field_info.annotation):
-            if isinstance(field_info.default, Iterable):
-                field_info.default = ",".join(map(str, field_info.default))
+        if check_sequence_type(field_type):
+            if isinstance(f.default, Iterable):
+                field_info.default = ",".join(map(str, f.default))
 
-            res_field_type = str if field_info.is_required() else Optional[str]
+            res_field_type = str if f.required else Optional[str]
             ret[field_name] = (res_field_type, field_info)
 
         elif check_nested_filter_type(field_type):
@@ -155,9 +182,7 @@ def flatten_filter_fields(
             })
 
         else:
-            res_field_type = field_type \
-                if field_info.is_required() \
-                else Optional[field_type]
+            res_field_type = field_type if f.required else Optional[field_type]
 
             ret[field_name] = (res_field_type, field_info)
 
@@ -179,11 +204,11 @@ def pack_values(
         transformed_values (BaseFilterParams): Transformed Values
     """
 
-    model_fields = filter_class.model_fields
+    model_fields = _get_model_fields(filter_class)
     construction_dict = {}
 
-    for field_name, info in model_fields.items():
-        field_type = filter_class.__annotations__.get(field_name, info.annotation)
+    for field_name, f in model_fields.items():
+        field_type = filter_class.__annotations__.get(field_name, f.type_)
 
         if check_nested_filter_type(field_type):
             nested_filter_type = get_optional_subtype(field_type) or field_type
@@ -204,7 +229,7 @@ def pack_values(
             construction_dict[field_name] = values.get(field_name)
 
     try:
-        res = filter_class.model_validate(construction_dict)
+        res = _validate(filter_class, construction_dict)
     except ValidationError as err:
         errors = [
             {

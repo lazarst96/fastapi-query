@@ -4,6 +4,7 @@ from sqlalchemy import Select, and_, Column, or_
 from sqlalchemy.inspection import inspect
 from sqlalchemy.orm import Relationship, Query
 
+from fastapi_query._compat import _model_dump
 from fastapi_query.filtering import BaseFilterParams
 from fastapi_query.filtering.enums import FilterOperators
 
@@ -100,7 +101,7 @@ def _get_orm_filters(
     relationships: Dict[str, Relationship] = dict(inspect(model_class).relationships)
 
     res = []
-    filter_fields = filters.model_dump(exclude_none=True)
+    filter_fields = _model_dump(filters, exclude_none=True)
 
     for field_name, value in filter_fields.items():
         if "__" in field_name:

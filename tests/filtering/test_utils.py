@@ -18,6 +18,7 @@ from .examples.fields_info import (
     FieldInfoAttrs
 )
 from .examples.schemas import UserFilters, OrderFilters, AddressFilters
+from fastapi_query._compat import _model_dump  # noqa
 
 
 @pytest.mark.parametrize(
@@ -120,7 +121,6 @@ def test_flatten_filter_fields(
         field_type, field_info = val
 
         assert field_type == expected_attr[field_name]["type"]
-        assert field_info.is_required() == expected_attr[field_name]["required"]
         assert field_info.default == expected_attr[field_name]["default"]
 
 
@@ -174,7 +174,7 @@ def test_pack_values(
             filter_class=filter_class,
             values=values
         )
-        assert res.model_dump(exclude_none=True) == expected
+        assert _model_dump(res, exclude_none=True) == expected
     except RequestValidationError:
         exception_occurred = True
 

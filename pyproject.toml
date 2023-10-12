@@ -1,27 +1,49 @@
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
 [tool.poetry]
 name = "fastapi-query"
-version = "0.1.0"
-description = ""
+version = "0.1-alpha"
+description = "FastAPI Library for Filtering, Ordering, and Pagination"
 authors = ["Lazar Stamenkovic <lazarstamenkovic96@hotmail.com>"]
 readme = "README.md"
-packages = [{include = "fastapi_query"}]
+license = "MIT"
+repository = "https://github.com/lazarst96/fastapi-query"
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Environment :: Web Environment",
+    "Framework :: AsyncIO",
+    "Framework :: FastAPI",
+    "Framework :: Pydantic",
+    "Framework :: Pydantic :: 1",
+    "Framework :: Pydantic :: 2",
+    "Intended Audience :: Developers",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Software Development :: Libraries",
+    "Topic :: Software Development",
+]
+packages = [{ include = "fastapi_query" }]
 
 [tool.poetry.dependencies]
 python = ">=3.8,<4.0"
 fastapi = ">=0.78,<1.0"
-pydantic = ">=2.0.0,<3.0.0"
-sqlalchemy = {version = ">=1.4.36,<3.0.0", optional = true}
-mongoengine = {version = ">=0.24.1,<0.30.0", optional = true}
-uvicorn = "^0.23.2"
+pydantic = "^2"
+sqlalchemy = { version = ">=1.4.36,<3.0.0", optional = true }
 
 
 [tool.poetry.extras]
-mongoengine = ["mongoengine"]
 sqlalchemy = ["sqlalchemy"]
-all = ["mongoengine", "sqlalchemy"]
+all = ["sqlalchemy"]
 
 
 [tool.poetry.group.dev.dependencies]
+uvicorn = "^0.23.2"
 psycopg2 = "^2.9.7"
 pytest = "^7.4.2"
 coverage = "^7.3.2"
@@ -38,15 +60,15 @@ ruff = "^0.0.292"
 
 [tool.ruff]
 select = [
-  "E",  # pycodestyle errors
-  "W",  # pycodestyle warnings
-  "F",  # pyflakes
-  "Q",  # flake8-quotes
-  "C",  # flake8-comprehensions
-  "B",  # flake8-bugbear
+    "E", # pycodestyle errors
+    "W", # pycodestyle warnings
+    "F", # pyflakes
+    "Q", # flake8-quotes
+    "C", # flake8-comprehensions
+    "B", # flake8-bugbear
 ]
 ignore = [
-    "B008",  # do not perform function calls in argument defaults
+    "B008", # do not perform function calls in argument defaults
 ]
 line-length = 88
 
@@ -54,7 +76,3 @@ line-length = 88
 avoid-escape = false
 docstring-quotes = "double"
 inline-quotes = "double"
-
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"

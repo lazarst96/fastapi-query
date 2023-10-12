@@ -1,6 +1,8 @@
-from typing import List, Optional, Type
+from typing import List, Optional, Type, Dict, Any
 
-from pydantic import BaseModel, model_validator
+from pydantic import BaseModel
+
+from fastapi_query._compat import _model_validator
 
 from .enums import FilterOperators
 
@@ -9,8 +11,8 @@ OPERATORS_WITH_SEQ_ARG = {FilterOperators.IN, FilterOperators.NIN}
 
 class BaseFilterParams(BaseModel):
 
-    @model_validator(mode="before")
-    def parse_raw_values(cls, values):
+    @_model_validator(mode="before")
+    def parse_raw_values(cls, values: Dict[str, Any]) -> Dict[str, Any]:
 
         res = {}
 
