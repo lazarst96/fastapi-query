@@ -23,6 +23,37 @@ all = ["mongoengine", "sqlalchemy"]
 
 [tool.poetry.group.dev.dependencies]
 psycopg2 = "^2.9.7"
+pytest = "^7.4.2"
+coverage = "^7.3.2"
+pytest-env = "^1.0.1"
+httpx = "^0.25.0"
+aiosqlite = "^0.19.0"
+greenlet = "^3.0.0"
+pytest-asyncio = "^0.21.1"
+asyncpg = "^0.28.0"
+
+
+[tool.poetry.group.lint.dependencies]
+ruff = "^0.0.292"
+
+[tool.ruff]
+select = [
+  "E",  # pycodestyle errors
+  "W",  # pycodestyle warnings
+  "F",  # pyflakes
+  "Q",  # flake8-quotes
+  "C",  # flake8-comprehensions
+  "B",  # flake8-bugbear
+]
+ignore = [
+    "B008",  # do not perform function calls in argument defaults
+]
+line-length = 88
+
+[tool.ruff.flake8-quotes]
+avoid-escape = false
+docstring-quotes = "double"
+inline-quotes = "double"
 
 [build-system]
 requires = ["poetry-core"]

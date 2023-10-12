@@ -1,8 +1,8 @@
-from typing import TypeVar, Generic, Optional
+from typing import TypeVar, Generic
 
 from pydantic import BaseModel, Field
 
-DataT = TypeVar('DataT')
+DataT = TypeVar("DataT")
 
 
 class PaginatedMeta(BaseModel):

@@ -1,8 +1,9 @@
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from .models import Tag, User, Paper, Address
-from sqlalchemy.orm import Session
 
 
-def seed_db(db: Session):
+async def seed_db(db: AsyncSession):
     tags = [
         Tag(name="Engineering"),
         Tag(name="Computer Science"),
@@ -74,4 +75,4 @@ def seed_db(db: Session):
         *users,
         *papers
     ])
-    db.commit()
+    await db.commit()

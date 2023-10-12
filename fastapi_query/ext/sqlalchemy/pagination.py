@@ -47,17 +47,19 @@ def paginate(
     Parameters:
         db (Session): SQLAlchemy Active Session
         stmt (Select): Pre-constructed Select Statement
-        pagination_params (PaginationParams): Pagination Params that will be applied
+        pagination_params (PaginationParams): Pagination Params
         model_class (Optional[Any]): SQLAlchemy Model Class
-        filter_params (Optional[BaseFilterParams]): Filtering Params that will be applied
-        ordering_params (Optional[str]): OrderBy Params (comma-separated) that will be applied
+        filter_params (Optional[BaseFilterParams]): Filtering Params
+        ordering_params (Optional[str]): OrderBy Params (comma-separated)
 
     Returns:
         paginated_response (Dict[str, Any]): Paginated Result
     """
 
     if (filter_params or ordering_params) and not model_class:
-        raise ValueError("'model_class' is required when either filtering or ordering is applied")
+        raise ValueError(
+            "'model_class' is required when either filtering or ordering is applied"
+        )
 
     # Apply Filtering if params are provided
     if filter_params:
@@ -108,17 +110,19 @@ async def paginate_async(
     Parameters:
         db (AsyncSession): SQLAlchemy Async Active Session
         stmt (Select): Pre-constructed Select Statement
-        pagination_params (PaginationParams): Pagination Params that will be applied
+        pagination_params (PaginationParams): Pagination Params
         model_class (Optional[Any]): SQLAlchemy Model Class
-        filter_params (Optional[BaseFilterParams]): Filtering Params that will be applied
-        ordering_params (Optional[str]): OrderBy Params (comma-separated) that will be applied
+        filter_params (Optional[BaseFilterParams]): Filtering Params
+        ordering_params (Optional[str]): OrderBy Params (comma-separated)
 
     Returns:
         paginated_response (Dict[str, Any]): Paginated Result
     """
 
     if (filter_params or ordering_params) and not model_class:
-        raise ValueError("'model_class' is required when either filtering or ordering is applied")
+        raise ValueError(
+            "'model_class' is required when either filtering or ordering is applied"
+        )
 
     # Apply Filtering if params are provided
     if filter_params:

@@ -9,7 +9,7 @@ OPERATORS_WITH_SEQ_ARG = {FilterOperators.IN, FilterOperators.NIN}
 
 class BaseFilterParams(BaseModel):
 
-    @model_validator(mode='before')
+    @model_validator(mode="before")
     def parse_raw_values(cls, values):
 
         res = {}
@@ -17,19 +17,19 @@ class BaseFilterParams(BaseModel):
         for field, value in values.items():
             if (
                     value is not None and
-                    '__' in field and
+                    "__" in field and
                     field.split("__")[-1] in OPERATORS_WITH_SEQ_ARG
 
             ):
-                res[field] = value.split(',')
+                res[field] = value.split(",")
             else:
                 res[field] = value
 
         return res
 
-    class Config:
+    class Settings:
         prefix: Optional[str] = None
-        search_field: str = 'search'
+        search_field: str = "search"
         searchable_fields: List[str] = []
 
 
@@ -41,7 +41,7 @@ def WithPrefix( # noqa
     global_prefix = prefix
 
     class WrapperFilterParams(model):
-        class Config(model.Config):
+        class Settings(model.Settings):
             prefix = global_prefix
 
     return WrapperFilterParams

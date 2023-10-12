@@ -27,7 +27,6 @@ class UserFilters(BaseFilterParams):
     email: Optional[str] = None
     email__like: Optional[str] = None
     deleted_at__isnull: Optional[bool] = None
-    deleted_at__gte: Optional[datetime] = None
 
     tags: Optional[TagFilters] = None
 

@@ -1,4 +1,4 @@
-from typing import Type, TypeVar, Optional
+from typing import Type, TypeVar
 from typing_extensions import Annotated
 
 from fastapi import Depends
@@ -7,7 +7,7 @@ from pydantic import create_model
 from .base_params import BaseFilterParams
 from .utils import flatten_filter_fields, pack_values
 
-FilterParamsType = TypeVar('FilterParamsType', bound=BaseFilterParams)
+FilterParamsType = TypeVar("FilterParamsType", bound=BaseFilterParams)
 
 def Filter( # noqa
         model: Type[FilterParamsType]
@@ -23,13 +23,15 @@ def Filter( # noqa
     """
     fields = flatten_filter_fields(model)
 
-    GeneratedFilterModel: Type[BaseFilterParams] = create_model( # noqa
+    GeneratedFilterModel: Type[BaseFilterParams] = create_model(
         model.__class__.__name__,
         **fields
     )
 
+    InnerFilters = Annotated[GeneratedFilterModel, Depends(GeneratedFilterModel)]
+
     def wrapped_func(
-            inner_filters: Annotated[GeneratedFilterModel, Depends(GeneratedFilterModel)]
+            inner_filters: InnerFilters
     ) -> FilterParamsType:
 
         values = inner_filters.model_dump()

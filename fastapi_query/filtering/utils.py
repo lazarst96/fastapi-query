@@ -1,7 +1,17 @@
 import inspect
 import types
 from copy import deepcopy
-from typing import Type, Dict, Tuple, Union, Optional, Iterable, get_origin, get_args, Any
+from typing import (
+    Type,
+    Dict,
+    Tuple,
+    Union,
+    Optional,
+    Iterable,
+    get_origin,
+    get_args,
+    Any
+)
 
 from fastapi.exceptions import RequestValidationError
 from pydantic import ValidationError
@@ -18,7 +28,7 @@ def check_optional_type(tp: Type) -> bool:
         tp (Type): A type to check
 
     Returns:
-        val (bool): Boolean Value that determines whether provided type is Optional or not
+        val (bool): Value determines whether provided type is Optional or not
     """
     origin = get_origin(tp)
     args = get_args(tp)
@@ -26,19 +36,19 @@ def check_optional_type(tp: Type) -> bool:
     return (
             origin in (Union, types.UnionType) and
             len(args) == 2 and
-            args[-1] == type(None)
+            args[-1] == type(None)  # noqa
     )
 
 
 def get_optional_subtype(tp: Type) -> Optional[Type]:
     """
-    Returns Subtype of Optional Type.
+    Returns Subtype of Optional Type or None if type is not Optional.
 
     Parameters:
         tp (Type): Type to be observed
 
     Returns:
-        val (Type | None): Subtype of provided Optional Type or None if type is not Optional
+        val (Type | None): Subtype of provided Type
     """
 
     if not check_optional_type(tp):
@@ -56,20 +66,24 @@ def check_sequence_type(
 
     Parameters:
         tp (Type): A type to check
-        include_optional (bool): Boolean flag determines whether an optional sequence type will be accepted or not
+        include_optional (bool): Boolean flag determines
+            whether an optional sequence type will be accepted or not
 
     Returns:
-        val (bool): Boolean Value that determines whether provided type is sequence type or not
+        val (bool): Value determines whether provided type is sequence type or not
     """
     sequence_types = [list, set, frozenset, tuple]
     origin = get_origin(tp)
     args = get_args(tp)
 
-    is_list = inspect.isclass(origin) and any([issubclass(origin, t) for t in sequence_types])
+    is_list = (
+            inspect.isclass(origin) and
+            any(issubclass(origin, t) for t in sequence_types)
+    )
     is_optional_list = (
             check_optional_type(tp) and
             inspect.isclass(get_origin(args[0])) and
-            any([issubclass(get_origin(args[0]), t) for t in sequence_types])
+            any(issubclass(get_origin(args[0]), t) for t in sequence_types)
     )
 
     return is_list or (include_optional and is_optional_list)
@@ -84,15 +98,15 @@ def check_nested_filter_type(
 
     Parameters:
         tp (Type): A type to check
-        include_optional (bool): Boolean flag determines whether an optional nested filter type will be accepted or not
+        include_optional (bool): Boolean flag determines
+            whether an optional nested filter type will be accepted or not
 
     Returns:
-        val (bool): Boolean Value that determines whether provided type is Nested Filter Params Type
+        val (bool): Value determines whether provided type is Nested Filter Params Type
     """
-    origin = get_origin(tp)
     args = get_args(tp)
 
-    is_nester_filter = inspect.isclass(origin) and issubclass(origin, BaseFilterParams)
+    is_nester_filter = inspect.isclass(tp) and issubclass(tp, BaseFilterParams)
     is_optional_nester_filter = (
             check_optional_type(tp) and
             inspect.isclass(args[0]) and
@@ -124,20 +138,28 @@ def flatten_filter_fields(
 
         if check_sequence_type(field_info.annotation):
             if isinstance(field_info.default, Iterable):
-                field_info.default = ",".join(field_info.default)
+                field_info.default = ",".join(map(str, field_info.default))
 
-            ret[field_name] = (str if field_info.is_required() else Optional[str], field_info)
+            res_field_type = str if field_info.is_required() else Optional[str]
+            ret[field_name] = (res_field_type, field_info)
 
         elif check_nested_filter_type(field_type):
             nested_filter_type = get_optional_subtype(field_type) or field_type
 
-            prefix = nested_filter_type.Config.prefix or field_name
+            prefix = nested_filter_type.Settings.prefix or field_name
             nested_fields = flatten_filter_fields(nested_filter_type)
 
-            ret.update({f"{prefix}__{field}": info for field, info in nested_fields.items()})
+            ret.update({
+                f"{prefix}__{field}": info
+                for field, info in nested_fields.items()
+            })
 
         else:
-            ret[field_name] = (field_type if field_info.is_required() else Optional[field_type], field_info)
+            res_field_type = field_type \
+                if field_info.is_required() \
+                else Optional[field_type]
+
+            ret[field_name] = (res_field_type, field_info)
 
     return ret
 
@@ -166,10 +188,10 @@ def pack_values(
         if check_nested_filter_type(field_type):
             nested_filter_type = get_optional_subtype(field_type) or field_type
 
-            prefix = nested_filter_type.Config.prefix or field_name
+            prefix = nested_filter_type.Settings.prefix or field_name
 
             nested_values = {
-                "__".join(key.split('__')[1:]): value
+                "__".join(key.split("__")[1:]): value
                 for key, value in values.items()
                 if key.startswith(f"{prefix}__")
             }
@@ -184,15 +206,12 @@ def pack_values(
     try:
         res = filter_class.model_validate(construction_dict)
     except ValidationError as err:
-        errors = list(
-            map(
-                lambda error: {
-                    **error,
-                    "loc": ('query', *error['loc'])
-                },
-                err.errors()
-            )
-        )
-        raise RequestValidationError(errors=errors)
+        errors = [
+            {
+                **error,
+                "loc": ("query", *error["loc"])
+            } for error in err.errors()
+        ]
+        raise RequestValidationError(errors=errors) from None
 
     return res

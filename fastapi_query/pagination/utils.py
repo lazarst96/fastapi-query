@@ -10,9 +10,14 @@ def prepare_response(
         pagination_params: PaginationParams
 ) -> Dict[str, Any]:
 
-    current_page = pagination_params.page if not pagination_params.get_all else 1
-    items_per_page = pagination_params.size if not pagination_params.get_all else total_items
-    total_pages = ceil(total_items / pagination_params.size) if not pagination_params.get_all else 1
+    if pagination_params.get_all:
+        current_page = 1
+        items_per_page = total_items
+        total_pages = 1
+    else:
+        current_page = pagination_params.page
+        items_per_page = pagination_params.size
+        total_pages = ceil(total_items / pagination_params.size)
 
     return {
         "items": items,

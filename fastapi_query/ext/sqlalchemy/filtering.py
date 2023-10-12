@@ -15,8 +15,8 @@ def _backward_compatible_value_for_like_and_ilike(value: str) -> str:
         value (str): The value to filter.
 
     Returns:
-        Either the unmodified value if a percent sign is present, the value wrapped in % otherwise to preserve
-        current behavior.
+        Either the unmodified value if a percent sign is present,
+        the value wrapped in % otherwise to preserve current behavior.
     """
     if "%" not in value:
         value = f"%{value}%"
@@ -32,10 +32,10 @@ _orm_operator_transformer = {
     FilterOperators.LTE: lambda value: ("__le__", value),
     FilterOperators.IN: lambda value: ("in_", value),
     FilterOperators.NIN: lambda value: ("not_in", value),
-    FilterOperators.IS_NULL: lambda value: ("is_", None) if value is True else ("is_not", None),
+    FilterOperators.IS_NULL: lambda value: ("is_", None) if value is True else ("is_not", None),  # noqa: E501
     FilterOperators.NOT: lambda value: ("is_not", value),
-    FilterOperators.LIKE: lambda value: ("like", _backward_compatible_value_for_like_and_ilike(value)),
-    FilterOperators.ILIKE: lambda value: ("ilike", _backward_compatible_value_for_like_and_ilike(value)),
+    FilterOperators.LIKE: lambda value: ("like", _backward_compatible_value_for_like_and_ilike(value)),  # noqa: E501
+    FilterOperators.ILIKE: lambda value: ("ilike", _backward_compatible_value_for_like_and_ilike(value)),  # noqa: E501
 }
 
 
@@ -59,7 +59,7 @@ def _get_search_criteria(
             nested_searchable_fields[field_name].append("__".join(parts))
         elif hasattr(model_class, field_name):
             model_field = getattr(model_class, field_name)
-            res.append(getattr(model_field, 'ilike')(f"%{search_query}%"))
+            res.append(model_field.ilike(f"%{search_query}%"))
 
     for rel, nest_searchable_fields in nested_searchable_fields.items():
         if not nest_searchable_fields:
@@ -69,7 +69,7 @@ def _get_search_criteria(
         model_field = getattr(model_class, rel)
 
         criteria = _get_search_criteria(
-            model_class=relationships[rel].mapper.class_,  # noqa,
+            model_class=relationships[rel].mapper.class_,  # noqa
             search_query=search_query,
             searchable_fields=nest_searchable_fields
         )
@@ -114,12 +114,12 @@ def _get_orm_filters(
         else:
             operator = "__eq__"
 
-        if field_name == filters.Config.search_field:
+        if field_name == filters.Settings.search_field:
 
             criteria = _get_search_criteria(
                 model_class=model_class,
                 search_query=value,
-                searchable_fields=filters.Config.searchable_fields
+                searchable_fields=filters.Settings.searchable_fields
             )
             if criteria is not None:
                 res.append(criteria)
@@ -152,8 +152,23 @@ def _get_orm_filters(
 def apply_filters(
         model_class: Any,
         stmt: Select | Query,
-        filters: BaseFilterParams
+        filters: Optional[BaseFilterParams]
 ) -> Select | Query:
+    """
+    Function for applying filters to the query object
+
+    Parameters:
+        model_class (Any): SQLAlchemy Model Class
+        stmt (Select): Pre-constructed Select Statement
+       filters (BaseFilterParams): Comma-separated fields / field-paths
+
+    Returns:
+        result_stmt (Select): Result Statement
+    """
+
+    if not filters:
+        return stmt
+
     orm_filters = _get_orm_filters(
         model_class=model_class,
         filters=filters
