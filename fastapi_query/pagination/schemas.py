@@ -1,4 +1,4 @@
-from typing import TypeVar, Generic
+from typing import TypeVar, Generic, List
 
 from pydantic import BaseModel, Field
 
@@ -13,7 +13,7 @@ class PaginatedMeta(BaseModel):
 
 
 class Paginated(BaseModel, Generic[DataT]):
-    items: list[DataT]
+    items: List[DataT]
     meta: PaginatedMeta
 
 
