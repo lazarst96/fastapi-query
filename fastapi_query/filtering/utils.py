@@ -1,5 +1,4 @@
 import inspect
-import types
 from collections import deque
 from copy import deepcopy
 from typing import (
@@ -25,10 +24,10 @@ from pydantic.fields import FieldInfo
 
 from fastapi_query._compat import (
     _get_model_fields,
-    _validate
+    _validate,
+    UnionType
 )
 from .base_params import BaseFilterParams
-
 
 sequence_annotation_to_type = {
     Sequence: list,
@@ -61,7 +60,7 @@ def check_optional_type(tp: Type) -> bool:
     args = get_args(tp)
 
     return (
-            origin in (Union, types.UnionType) and
+            origin in (Union, UnionType) and
             len(args) == 2 and
             args[-1] == type(None)  # noqa
     )
