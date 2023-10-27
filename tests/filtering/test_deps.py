@@ -6,7 +6,7 @@ def test_filter_dependency(client: TestClient) -> None:
         url="/self",
         params={
             "id": 1,
-            "username__like": "%user%"
+            "username__contains": "user"
         }
     )
 
@@ -14,4 +14,4 @@ def test_filter_dependency(client: TestClient) -> None:
 
     data = response.json()
     assert data["id"] == 1
-    assert data["username__like"] == "%user%"
+    assert data["username__contains"] == "user"

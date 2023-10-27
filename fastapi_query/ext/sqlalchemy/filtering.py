@@ -1,28 +1,12 @@
 from typing import Any, Dict, List, Optional, Union
 
-from sqlalchemy import Select, and_, Column, or_
+from sqlalchemy import Select, and_, Column, or_, ColumnElement
 from sqlalchemy.inspection import inspect
 from sqlalchemy.orm import Relationship, Query
 
 from fastapi_query._compat import _model_dump
 from fastapi_query.filtering import BaseFilterParams
 from fastapi_query.filtering.enums import FilterOperators
-
-
-def _backward_compatible_value_for_like_and_ilike(value: str) -> str:
-    """Add % if not in value to be backward compatible.
-
-    Args:
-        value (str): The value to filter.
-
-    Returns:
-        Either the unmodified value if a percent sign is present,
-        the value wrapped in % otherwise to preserve current behavior.
-    """
-    if "%" not in value:
-        value = f"%{value}%"
-    return value
-
 
 _orm_operator_transformer = {
     FilterOperators.EQ: lambda value: ("__eq__", value),
@@ -32,11 +16,15 @@ _orm_operator_transformer = {
     FilterOperators.LT: lambda value: ("__lt__", value),
     FilterOperators.LTE: lambda value: ("__le__", value),
     FilterOperators.IN: lambda value: ("in_", value),
-    FilterOperators.NIN: lambda value: ("not_in", value),
+    FilterOperators.NOT_IN: lambda value: ("not_in", value),
     FilterOperators.IS_NULL: lambda value: ("is_", None) if value is True else ("is_not", None),  # noqa: E501
-    FilterOperators.NOT: lambda value: ("is_not", value),
-    FilterOperators.LIKE: lambda value: ("like", _backward_compatible_value_for_like_and_ilike(value)),  # noqa: E501
-    FilterOperators.ILIKE: lambda value: ("ilike", _backward_compatible_value_for_like_and_ilike(value)),  # noqa: E501
+    FilterOperators.STARTSWITH: lambda value: ("like", f"{value}%"),
+    FilterOperators.ISTARTSWITH: lambda value: ("ilike", f"{value}%"),
+    FilterOperators.ENDSWITH: lambda value: ("like", f"%{value}"),
+    FilterOperators.IENDSWITH: lambda value: ("ilike", f"%{value}"),
+    FilterOperators.CONTAINS: lambda value: ("like", f"%{value}%"),
+    FilterOperators.ICONTAINS: lambda value: ("ilike", f"%{value}%"),
+    FilterOperators.IEXACT: lambda value: ("ilike", value),
 }
 
 
@@ -44,7 +32,7 @@ def _get_search_criteria(
         model_class: Any,
         search_query: str,
         searchable_fields: Optional[List[str]]
-):
+) -> Optional[ColumnElement[bool]]:
     relationships: Dict[str, Relationship] = dict(inspect(model_class).relationships)
 
     res = []
@@ -61,6 +49,10 @@ def _get_search_criteria(
         elif hasattr(model_class, field_name):
             model_field = getattr(model_class, field_name)
             res.append(model_field.ilike(f"%{search_query}%"))
+        else:
+            raise ValueError(
+                f"{field_name} is not valid field for [{model_class.__name__}] model!"
+            )
 
     for rel, nest_searchable_fields in nested_searchable_fields.items():
         if not nest_searchable_fields:
@@ -129,7 +121,11 @@ def _get_orm_filters(
             model_field = getattr(model_class, field_name)
             res.append(getattr(model_field, operator)(value))
 
-        elif value and field_name in relationships and relationships[field_name]:
+        elif (
+                isinstance(value, dict) and
+                field_name in relationships and
+                relationships[field_name]
+        ):
 
             is_many = relationships[field_name].uselist
             nested_orm_filters = _get_orm_filters(
@@ -147,6 +143,11 @@ def _get_orm_filters(
                     model_field.has(and_(*nested_orm_filters))
                 )
 
+        elif value:
+            raise ValueError(
+                f"Invalid {model_class.__name__} Field - {field_name}"
+            )
+
     return res
 
 
@@ -161,7 +162,7 @@ def apply_filters(
     Parameters:
         model_class (Any): SQLAlchemy Model Class
         stmt (Union[Select, Query]): Pre-constructed Select Statement
-       filters (BaseFilterParams): Comma-separated fields / field-paths
+        filters (BaseFilterParams): Comma-separated fields / field-paths
 
     Returns:
         result_stmt (Union[Select, Query]): Result Statement
@@ -174,5 +175,8 @@ def apply_filters(
         model_class=model_class,
         filters=filters
     )
+
+    if not orm_filters:
+        return stmt
 
     return stmt.filter(and_(*orm_filters))

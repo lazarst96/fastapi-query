@@ -129,8 +129,8 @@ def test_flatten_filter_fields(
     [
         (
                 AddressFilters,
-                {"id": 1, "id__nin": "5,6"},
-                {"id": 1, "id__nin": [5, 6]},
+                {"id": 1, "id__not_in": "5,6"},
+                {"id": 1, "id__not_in": [5, 6]},
                 False
         ),
         (

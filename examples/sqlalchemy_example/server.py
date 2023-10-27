@@ -13,7 +13,7 @@ from .utils import seed_db
 
 app = FastAPI()
 
-engine = create_engine("postgresql:///fastapi-query-db", echo=True)
+engine = create_engine("postgresql:///fastapi-query-db")
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 

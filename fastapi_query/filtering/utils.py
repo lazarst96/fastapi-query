@@ -24,8 +24,7 @@ from pydantic.fields import FieldInfo
 
 from fastapi_query._compat import (
     _get_model_fields,
-    _validate,
-    UnionType
+    _validate
 )
 from .base_params import BaseFilterParams
 
@@ -60,7 +59,8 @@ def check_optional_type(tp: Type) -> bool:
     args = get_args(tp)
 
     return (
-            origin in (Union, UnionType) and
+
+            isinstance(origin, type(Union)) and
             len(args) == 2 and
             args[-1] == type(None)  # noqa
     )
@@ -74,7 +74,7 @@ def get_optional_subtype(tp: Type) -> Optional[Type]:
         tp (Type): Type to be observed
 
     Returns:
-        val (Type | None): Subtype of provided Type
+        val (Optional[Type]): Subtype of provided Type
     """
 
     if not check_optional_type(tp):

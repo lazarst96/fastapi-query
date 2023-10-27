@@ -1,12 +1,11 @@
-from sqlalchemy import select
-from sqlalchemy.orm import Session, selectinload, joinedload
+import pytest
+from tortoise.queryset import QuerySet
 
-from fastapi_query.ext.sqlalchemy import apply_filters
+from fastapi_query.ext.tortoise import apply_filters
 from fastapi_query.filtering import BaseFilterParams
 from .examples.models import (
     Product,
     Order,
-    OrderItem,
     Category
 )
 from .examples.schemas import (
@@ -17,31 +16,32 @@ from .examples.schemas import (
 )
 
 
-def test_category_filters(db: Session) -> None:
+@pytest.mark.asyncio
+async def test_category_filters() -> None:
     """ Test Filtering - with Category filters"""
     filter_params = CategoryFilters(
         search="kit"
     )
 
-    stmt = select(
+    queryset = QuerySet(
         Category
-    ).where(
-        Category.deleted_at.is_(None)
+    ).filter(
+        deleted_at=None
     )
 
-    stmt = apply_filters(
-        model_class=Category,
-        stmt=stmt,
+    queryset = apply_filters(
+        queryset=queryset,
         filters=filter_params
     )
 
-    res = db.scalars(stmt).all()
+    res = await queryset.all()
 
     assert len(res) == 1
     assert res[0].name == "kitchen"
 
 
-def test_product_filters(db: Session) -> None:
+@pytest.mark.asyncio
+async def test_product_filters() -> None:
     """ Test Filtering - with Product filters"""
     filter_params = ProductFilters(
         name__icontains="pan",
@@ -49,27 +49,27 @@ def test_product_filters(db: Session) -> None:
         price__gt=1500,
     )
 
-    stmt = select(
+    queryset = QuerySet(
         Product
-    ).options(
-        selectinload(Product.categories)
-    ).where(
-        Product.deleted_at.is_(None)
+    ).prefetch_related(
+        "categories"
+    ).filter(
+        deleted_at=None
     )
 
-    stmt = apply_filters(
-        model_class=Product,
-        stmt=stmt,
+    queryset = apply_filters(
+        queryset=queryset,
         filters=filter_params
     )
 
-    res = db.scalars(stmt).all()
+    res = await queryset.all()
 
     assert len(res) == 1
     assert res[0].name == "Frying Pan"
 
 
-def test_product_filters_and_search(db: Session) -> None:
+@pytest.mark.asyncio
+async def test_product_filters_and_search() -> None:
     """ Test Filtering - with Product filters and search"""
     filter_params = ProductFilters(
         search="pan",
@@ -77,27 +77,27 @@ def test_product_filters_and_search(db: Session) -> None:
         price__gt=1500,
     )
 
-    stmt = select(
+    queryset = QuerySet(
         Product
-    ).options(
-        selectinload(Product.categories)
-    ).where(
-        Product.deleted_at.is_(None)
+    ).prefetch_related(
+        "categories"
+    ).filter(
+        deleted_at=None
     )
 
-    stmt = apply_filters(
-        model_class=Product,
-        stmt=stmt,
+    queryset = apply_filters(
+        queryset=queryset,
         filters=filter_params
     )
 
-    res = db.scalars(stmt).all()
+    res = await queryset.all()
 
     assert len(res) == 1
     assert res[0].name == "Frying Pan"
 
 
-def test_order_filters(db: Session) -> None:
+@pytest.mark.asyncio
+async def test_order_filters() -> None:
     """ Test Filtering - with Order filters"""
     filter_params = OrderFilters(
         shipping_address=AddressNestedFilters(
@@ -106,53 +106,51 @@ def test_order_filters(db: Session) -> None:
         total_amount__gt=1000
     )
 
-    stmt = select(
+    queryset = QuerySet(
         Order
-    ).options(
-        joinedload(Order.shipping_address),
-        selectinload(Order.items).joinedload(OrderItem.product)
-    ).where(
-        Order.deleted_at.is_(None)
+    ).prefetch_related(
+        "items", "items__product"
+    ).filter(
+        deleted_at=None
     )
 
-    stmt = apply_filters(
-        model_class=Order,
-        stmt=stmt,
+    queryset = apply_filters(
+        queryset=queryset,
         filters=filter_params
     )
 
-    res = db.scalars(stmt).all()
+    res = await queryset.all()
 
     assert len(res) == 0
 
 
-def test_order_filters_and_search(db: Session) -> None:
+@pytest.mark.asyncio
+async def test_order_filters_and_search() -> None:
     """ Test Filtering - with Order filters and Search"""
     filter_params = OrderFilters(
         search="west"
     )
 
-    stmt = select(
+    queryset = QuerySet(
         Order
-    ).options(
-        joinedload(Order.shipping_address),
-        selectinload(Order.items).joinedload(OrderItem.product)
-    ).where(
-        Order.deleted_at.is_(None)
+    ).prefetch_related(
+        "items", "items__product"
+    ).filter(
+        deleted_at=None
     )
 
-    stmt = apply_filters(
-        model_class=Order,
-        stmt=stmt,
+    queryset = apply_filters(
+        queryset=queryset,
         filters=filter_params
     )
 
-    res = db.scalars(stmt).all()
+    res = await queryset.all()
 
     assert len(res) == 1
 
 
-def test_invalid_field(db: Session) -> None:
+@pytest.mark.asyncio
+async def test_invalid_field() -> None:
     """ Test Filtering - Invalid Field"""
 
     class CategoryInvalidFilters(BaseFilterParams):
@@ -162,18 +160,17 @@ def test_invalid_field(db: Session) -> None:
         invalid=1
     )
 
-    stmt = select(
-        Category
-    ).where(
-        Category.deleted_at.is_(None)
-    )
-
     exception_occurred = False
 
+    queryset = QuerySet(
+        Category
+    ).filter(
+        deleted_at=None
+    )
+
     try:
-        apply_filters(
-            model_class=Category,
-            stmt=stmt,
+        _ = apply_filters(
+            queryset=queryset,
             filters=filter_params
         )
     except ValueError:
@@ -182,7 +179,8 @@ def test_invalid_field(db: Session) -> None:
     assert exception_occurred
 
 
-def test_invalid_relationship_value_shape(db: Session) -> None:
+@pytest.mark.asyncio
+async def test_invalid_relationship_value_shape() -> None:
     """ Test Filtering - Invalid Relationship Filter Shape"""
 
     class ProductInvalidFilters(BaseFilterParams):
@@ -194,19 +192,17 @@ def test_invalid_relationship_value_shape(db: Session) -> None:
 
     exception_occurred = False
 
-    stmt = select(
-        Order
-    ).options(
-        joinedload(Order.shipping_address),
-        selectinload(Order.items).joinedload(OrderItem.product)
-    ).where(
-        Order.deleted_at.is_(None)
+    queryset = QuerySet(
+        Product
+    ).prefetch_related(
+        "categories"
+    ).filter(
+        deleted_at=None
     )
 
     try:
         _ = apply_filters(
-            model_class=Order,
-            stmt=stmt,
+            queryset=queryset,
             filters=filter_params
         )
     except ValueError:
@@ -215,7 +211,8 @@ def test_invalid_relationship_value_shape(db: Session) -> None:
     assert exception_occurred
 
 
-def test_invalid_filter_operator(db: Session) -> None:
+@pytest.mark.asyncio
+async def test_invalid_filter_operator() -> None:
     """ Test Filtering - Invalid Operator"""
 
     class CategoryInvalidFilters(BaseFilterParams):
@@ -225,18 +222,17 @@ def test_invalid_filter_operator(db: Session) -> None:
         id__invalid=1
     )
 
-    stmt = select(
+    queryset = QuerySet(
         Category
-    ).where(
-        Category.deleted_at.is_(None)
+    ).filter(
+        deleted_at=None
     )
 
     exception_occurred = False
 
     try:
-        apply_filters(
-            model_class=Category,
-            stmt=stmt,
+        _ = apply_filters(
+            queryset=queryset,
             filters=filter_params
         )
     except ValueError:
@@ -245,7 +241,8 @@ def test_invalid_filter_operator(db: Session) -> None:
     assert exception_occurred
 
 
-def test_no_valid_searchable_field(db: Session) -> None:
+@pytest.mark.asyncio
+async def test_no_valid_searchable_field() -> None:
     """ Test Filtering - No Valid Searchable Field"""
 
     class CategoryInvalidFilters(BaseFilterParams):
@@ -258,18 +255,17 @@ def test_no_valid_searchable_field(db: Session) -> None:
         search="test"
     )
 
-    stmt = select(
+    queryset = QuerySet(
         Category
-    ).where(
-        Category.deleted_at.is_(None)
+    ).filter(
+        deleted_at=None
     )
 
     exception_occurred = False
 
     try:
-        apply_filters(
-            model_class=Category,
-            stmt=stmt,
+        _ = apply_filters(
+            queryset=queryset,
             filters=filter_params
         )
     except ValueError:
@@ -278,7 +274,8 @@ def test_no_valid_searchable_field(db: Session) -> None:
     assert exception_occurred
 
 
-def test_search_with_empty_searchable_field(db: Session) -> None:
+@pytest.mark.asyncio
+async def test_search_with_empty_searchable_field() -> None:
     """ Test Filtering - No Valid Searchable Field"""
 
     class CategoryInvalidFilters(BaseFilterParams):
@@ -291,37 +288,36 @@ def test_search_with_empty_searchable_field(db: Session) -> None:
         search="test"
     )
 
-    stmt_before = select(
+    queryset_before = QuerySet(
         Category
-    ).where(
-        Category.deleted_at.is_(None)
+    ).filter(
+        deleted_at=None
     )
 
-    stmt_after = apply_filters(
-        model_class=Category,
-        stmt=stmt_before,
+    queryset_after = apply_filters(
+        queryset=queryset_before,
         filters=filter_params
     )
 
-    res = db.scalars(stmt_after).all()
+    res = await queryset_after.all()
 
     assert len(res) == 7
-    assert stmt_before == stmt_after
+    assert queryset_before == queryset_after
 
 
-def test_no_filters(db: Session) -> None:
+@pytest.mark.asyncio
+async def test_no_filters() -> None:
     """ Test Filtering - No Filters"""
 
-    stmt_before = select(
+    queryset_before = QuerySet(
         Category
-    ).where(
-        Category.deleted_at.is_(None)
+    ).filter(
+        deleted_at=None
     )
 
-    stmt_after = apply_filters(
-        model_class=Category,
-        stmt=stmt_before,
+    queryset_after = apply_filters(
+        queryset=queryset_before,
         filters=None
     )
 
-    assert stmt_before == stmt_after
+    assert queryset_before == queryset_after

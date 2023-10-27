@@ -78,7 +78,7 @@ def test_basic_category_with_get_all(db: Session) -> None:
 def test_product_with_filters(db: Session) -> None:
     """ Test Pagination - Basic with filters"""
     filter_params = ProductFilters(
-        name__ilike="pan",
+        name__icontains="pan",
         price__lt=3000,
         price__gt=1500,
     )
@@ -151,7 +151,7 @@ def test_product_with_ordering(db: Session) -> None:
 def test_missing_model_class(db: Session) -> None:
     """ Test Pagination - Basic with filters"""
     filter_params = ProductFilters(
-        name__ilike="pan",
+        name__icontains="pan",
         price__lt=3000,
         price__gt=1500,
     )
@@ -250,7 +250,7 @@ async def test_async_basic_with_get_all(async_db: AsyncSession) -> None:
 async def test_async_with_filters(async_db: AsyncSession) -> None:
     """ Test Async Pagination - Basic with filters"""
     filter_params = ProductFilters(
-        name__ilike="pan",
+        name__icontains="pan",
         price__lt=3000,
         price__gt=1500,
     )
@@ -325,7 +325,7 @@ async def test_async_with_ordering(async_db: AsyncSession) -> None:
 async def test_async_with_missing_model_class(async_db: AsyncSession) -> None:
     """ Test Async Pagination - Basic with filters"""
     filter_params = ProductFilters(
-        name__ilike="pan",
+        name__icontains="pan",
         price__lt=3000,
         price__gt=1500,
     )

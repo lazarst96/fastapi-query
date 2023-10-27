@@ -14,12 +14,12 @@ ADDRESS_FIELDS_INFO: Dict[str, FieldInfoAttrs] = {
         "required": False,
         "default": None
     },
-    "id__nin": {
+    "id__not_in": {
         "type": Optional[str],
         "required": False,
         "default": "5,6"
     },
-    "line_1__ilike": {
+    "line_1__icontains": {
         "type": Optional[str],
         "required": False,
         "default": None
@@ -70,7 +70,7 @@ USER_FIELDS_INFO: Dict[str, FieldInfoAttrs] = {
         "required": False,
         "default": None
     },
-    "username__like": {
+    "username__contains": {
         "type": Optional[str],
         "required": False,
         "default": None

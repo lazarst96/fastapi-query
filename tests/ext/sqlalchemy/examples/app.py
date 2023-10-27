@@ -13,7 +13,7 @@ from .schemas import ProductOut, ProductFilters
 
 def create_app(
         session_constructor: Callable
-):
+) -> FastAPI:
     app = FastAPI()
 
     def get_db() -> Iterator[Session]:
