@@ -35,11 +35,13 @@ python = ">=3.8,<4.0"
 fastapi = ">=0.78,<1.0"
 pydantic = ">=1.10.0,<3.0.0"
 sqlalchemy = { version = ">=1.4.36,<3.0.0", optional = true }
+tortoise-orm = { version = ">=0.16.18,<0.21.0", optional = true }
 
 
 [tool.poetry.extras]
 sqlalchemy = ["sqlalchemy"]
-all = ["sqlalchemy"]
+tortoise = ["tortoise-orm"]
+all = ["sqlalchemy", "tortoise-orm"]
 
 
 [tool.poetry.group.dev.dependencies]
@@ -49,14 +51,16 @@ pytest = "^7.4.2"
 coverage = "^7.3.2"
 pytest-env = "^1.0.1"
 httpx = "^0.25.0"
-aiosqlite = "^0.19.0"
-greenlet = "^3.0.0"
+aiosqlite = ">=0.16.0,<0.18.0"
+greenlet = "^2.0.0"
 pytest-asyncio = "^0.21.1"
 asyncpg = "^0.28.0"
+pre-commit = "^3.5.0"
 
 
 [tool.poetry.group.lint.dependencies]
 ruff = "^0.0.292"
+mypy = "^1.6.1"
 
 [tool.ruff]
 select = [
@@ -76,3 +80,33 @@ line-length = 88
 avoid-escape = false
 docstring-quotes = "double"
 inline-quotes = "double"
+
+
+[tool.mypy]
+python_version = 3.8
+strict = false
+follow_imports = "normal"
+ignore_missing_imports = true
+no_implicit_reexport = false
+show_column_numbers= true
+show_error_codes= true
+
+
+[[tool.mypy.overrides]]
+module = "tests.*"
+ignore_missing_imports = true
+check_untyped_defs = true
+
+[tool.coverage.paths]
+source = ["fastapi_pagination"]
+
+[tool.coverage.run]
+source = ["fastapi_pagination"]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "@abstractmethod",
+    "@overload",
+    "if TYPE_CHECKING:",
+]

@@ -4,7 +4,7 @@ from fastapi_query.filtering import Filter
 from .schemas import UserFilters
 
 
-def create_app():
+def create_app() -> FastAPI:
     app = FastAPI()
 
     @app.get("/self")

@@ -14,18 +14,18 @@ class TagFilters(BaseFilterParams):
     id: Optional[int] = None
     id__in: Optional[List[int]] = None
     name: Optional[str] = None
-    name__ilike: Optional[str] = None
+    name__icontains: Optional[str] = None
 
     papers: Optional[NestedPaperFilters] = None
 
 
 class UserFilters(BaseFilterParams):
     first_name: Optional[str] = None
-    first_name__ilike: Optional[str] = None
+    first_name__icontains: Optional[str] = None
     last_name: Optional[str] = None
-    last_name__ilike: Optional[str] = None
+    last_name__icontains: Optional[str] = None
     email: Optional[str] = None
-    email__like: Optional[str] = None
+    email__contains: Optional[str] = None
     deleted_at__isnull: Optional[bool] = None
 
     tags: Optional[TagFilters] = None
@@ -35,7 +35,7 @@ class UserFilters(BaseFilterParams):
 
 
 class PaperFilters(BaseFilterParams):
-    title__ilike: Optional[str] = None
+    title__icontains: Optional[str] = None
     author_id: Optional[int] = None
     author_id__neq: Optional[int] = None
     author_id__not_in: Optional[List[int]] = None

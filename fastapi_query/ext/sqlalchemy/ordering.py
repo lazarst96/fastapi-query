@@ -80,7 +80,7 @@ def apply_ordering(
         if not model_field:
             continue
 
-        criterion.append(model_field.desc() if desc else field)
+        criterion.append(model_field.desc() if desc else model_field)
 
     if criterion:
         stmt = stmt.order_by(*criterion)

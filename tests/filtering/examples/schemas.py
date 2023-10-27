@@ -8,8 +8,8 @@ from fastapi_query.filtering import BaseFilterParams
 
 class AddressFilters(BaseFilterParams):
     id: Optional[int] = None
-    id__nin: Optional[List[int]] = Field(default=[5, 6])
-    line_1__ilike: Optional[str] = None
+    id__not_in: Optional[List[int]] = Field(default=[5, 6])
+    line_1__icontains: Optional[str] = None
     city: Optional[str] = None
 
 
@@ -24,7 +24,7 @@ class UserFilters(BaseFilterParams):
     id: Optional[int] = None
     id__in: Optional[List[int]] = Field(default=[1, 2, 3])
     username: Optional[str] = None
-    username__like: Optional[str] = None
+    username__contains: Optional[str] = None
     created_at: Optional[datetime] = None
     created_at__gte: Optional[datetime] = None
     created_at__lte: Optional[datetime] = None

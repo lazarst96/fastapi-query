@@ -3,7 +3,7 @@ from fastapi import FastAPI
 from fastapi_query.pagination import PaginationParams, Paginate
 
 
-def create_app():
+def create_app() -> FastAPI:
     app = FastAPI()
 
     @app.get("/self")
