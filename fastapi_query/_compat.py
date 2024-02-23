@@ -1,20 +1,11 @@
 from dataclasses import dataclass
-from typing import Any, Dict, Type
-from typing_extensions import Annotated, Literal
+from typing import Any, Dict, Type, Callable
 
 from pydantic import BaseModel
 from pydantic.version import VERSION as PYDANTIC_VERSION
-import sys
-import types
+from typing_extensions import Annotated, Literal
 
 PYDANTIC_V2 = PYDANTIC_VERSION.startswith("2.")
-
-
-if sys.version.startswith("3.8.") or sys.version.startswith("3.9."):
-    UnionType = types.Union # noqa
-else:
-    UnionType = types.UnionType
-
 
 if PYDANTIC_V2:
     from pydantic import model_validator
@@ -99,7 +90,7 @@ if PYDANTIC_V2:
         return model_validator(*args, mode=mode)  # noqa
 
 
-    def _is_model_field_required(field: FieldInfo) -> bool:
+    def _is_model_field_required(field: Any) -> bool:
         return field.is_required()
 else:
     from pydantic import root_validator
@@ -130,16 +121,15 @@ else:
     def _model_validator(
             *args,
             mode: Literal["before", "after"] = "before"
-    ) -> classmethod:
+    ) -> Callable:
         return root_validator(*args, pre=mode == "before")  # noqa
 
 
-    def _is_model_field_required(field: ModelField) -> bool:
+    def _is_model_field_required(field: Any) -> bool:
         return field.required
 
 __all__ = [
     "PYDANTIC_V2",
-    "UnionType",
     "_model_dump",
     "_model_validator",
     "_get_model_fields",

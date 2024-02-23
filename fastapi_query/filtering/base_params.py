@@ -6,7 +6,7 @@ from fastapi_query._compat import _model_validator
 
 from .enums import FilterOperators
 
-OPERATORS_WITH_SEQ_ARG = {FilterOperators.IN, FilterOperators.NIN}
+OPERATORS_WITH_SEQ_ARG = {FilterOperators.IN, FilterOperators.NOT_IN}
 
 
 class BaseFilterParams(BaseModel):

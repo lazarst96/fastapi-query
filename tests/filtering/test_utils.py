@@ -32,7 +32,7 @@ from fastapi_query._compat import _model_dump  # noqa
     ]
 )
 def test_check_optional_type(
-        tp: Type,
+        tp: Type[Any],
         expected: bool
 ) -> None:
     assert check_optional_type(tp=tp) == expected
@@ -49,8 +49,8 @@ def test_check_optional_type(
     ]
 )
 def test_get_optional_subtype(
-        tp: Type,
-        expected: Type
+        tp: Type[Any],
+        expected: Type[Any]
 ) -> None:
     assert get_optional_subtype(tp=tp) == expected
 
@@ -67,7 +67,7 @@ def test_get_optional_subtype(
     ]
 )
 def test_check_sequence_type(
-        tp: Type,
+        tp: Type[Any],
         include_optional: bool,
         expected: bool
 ) -> None:
@@ -92,7 +92,7 @@ def test_check_sequence_type(
     ]
 )
 def test_check_nested_filter_type(
-        tp: Type,
+        tp: Type[Any],
         include_optional: bool,
         expected: bool
 ) -> None:
@@ -129,8 +129,8 @@ def test_flatten_filter_fields(
     [
         (
                 AddressFilters,
-                {"id": 1, "id__nin": "5,6"},
-                {"id": 1, "id__nin": [5, 6]},
+                {"id": 1, "id__not_in": "5,6"},
+                {"id": 1, "id__not_in": [5, 6]},
                 False
         ),
         (

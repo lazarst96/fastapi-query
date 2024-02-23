@@ -14,7 +14,7 @@ ModelClass = TypeVar("ModelClass")
 
 
 def _paginate_query_with_page(
-        stmt: Select,
+        stmt: Union[Select, Query],
         params: PaginationParams
 ) -> Select:
     """
@@ -78,7 +78,7 @@ def paginate(
         )
 
     total_items = db.scalar(
-        select(func.count()).select_from(stmt)
+        select(func.count()).select_from(stmt.subquery())
     )
 
     if not pagination_params.get_all:
@@ -141,7 +141,7 @@ async def paginate_async(
         )
 
     total_items = await db.scalar(
-        select(func.count()).select_from(stmt)
+        select(func.count()).select_from(stmt.subquery())
     )
 
     if not pagination_params.get_all:
