@@ -24,12 +24,12 @@ class ProductOut(BaseResponseModel):
 
 
 class AddressOut(BaseResponseModel):
-    line_1: str
-    line_2: Optional[str]
+    address_line: str
     city: str
-    state: Optional[str]
+    state: str
     country: str
     zip_code: str
+    full_address: str
 
 
 class OrderItemOut(BaseResponseModel):
@@ -70,6 +70,7 @@ class ProductFilters(BaseFilterParams):
 
 
 class AddressNestedFilters(BaseFilterParams):
+    full_address__icontains: Optional[str] = None
     city: Optional[str] = None
     zip_code: Optional[str] = None
     zip_code__in: Optional[List[str]] = None
@@ -89,4 +90,4 @@ class OrderFilters(BaseFilterParams):
     items: Optional[OrderItemFilters] = None
 
     class Settings(BaseFilterParams.Settings):
-        searchable_fields = ["shipping_address__line_1"]
+        searchable_fields = ["shipping_address__address_line"]

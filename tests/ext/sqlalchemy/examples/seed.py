@@ -57,7 +57,7 @@ def _get_data() -> Tuple[
         Order(
             total_amount=4000,
             shipping_address=Address(
-                line_1="Main Street 1",
+                address_line="Main Street 1",
                 city="San Diego",
                 zip_code="90123",
                 state="CA",
@@ -73,7 +73,7 @@ def _get_data() -> Tuple[
         Order(
             total_amount=5500,
             shipping_address=Address(
-                line_1="Main Street 1",
+                address_line="Main Street 1",
                 city="San Diego",
                 zip_code="90123",
                 state="CA",
@@ -93,7 +93,7 @@ def _get_data() -> Tuple[
         Order(
             total_amount=30699,
             shipping_address=Address(
-                line_1="West Street 1",
+                address_line="West Street 1",
                 city="San Diego",
                 zip_code="90123",
                 state="CA",
@@ -113,7 +113,7 @@ def _get_data() -> Tuple[
         Order(
             total_amount=52999,
             shipping_address=Address(
-                line_1="Main Street 1",
+                address_line="Main Street 1",
                 city="San Diego",
                 zip_code="90123",
                 state="CA",

@@ -20,6 +20,7 @@ class TagFilters(BaseFilterParams):
 
 
 class UserFilters(BaseFilterParams):
+    full_name: Optional[str] = None
     first_name: Optional[str] = None
     first_name__icontains: Optional[str] = None
     last_name: Optional[str] = None

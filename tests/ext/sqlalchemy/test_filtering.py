@@ -101,6 +101,7 @@ def test_order_filters(db: Session) -> None:
     """ Test Filtering - with Order filters"""
     filter_params = OrderFilters(
         shipping_address=AddressNestedFilters(
+            full_address_icontains="92223",
             zip_code="92223"
         ),
         total_amount__gt=1000
