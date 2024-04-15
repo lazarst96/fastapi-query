@@ -2,6 +2,7 @@ from datetime import datetime
 from typing import Optional, List
 
 from sqlalchemy import DateTime, func, Table, Column, ForeignKey
+from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 
@@ -56,12 +57,21 @@ class Product(Base):
 class Address(Base):
     __tablename__ = "addresses"
     id: Mapped[int] = mapped_column(primary_key=True)
-    line_1: Mapped[str]
-    line_2: Mapped[Optional[str]]
+    address_line: Mapped[str]
     city: Mapped[str]
-    state: Mapped[Optional[str]]
+    state: Mapped[str]
     country: Mapped[str]
     zip_code: Mapped[str]
+
+    @hybrid_property
+    def full_address(self):
+        return (
+                self.address_line + ", " +
+                self.city + ", " +
+                self.state + ", " +
+                self.country + " " +
+                self.zip_code
+        )
 
 
 class Order(Base):

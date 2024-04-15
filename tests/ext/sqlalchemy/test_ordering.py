@@ -32,7 +32,7 @@ def test_single(db: Session) -> None:
 
 def test_nested(db: Session) -> None:
     """ Test Ordering - with nested criteria"""
-    order_by = "-shipping_address__line_1"
+    order_by = "-shipping_address__address_line"
 
     stmt = select(
         Order
@@ -53,7 +53,7 @@ def test_nested(db: Session) -> None:
     res = db.scalars(stmt).all()
 
     for i in range(len(res) - 1):
-        assert res[i].shipping_address.line_1 >= res[i + 1].shipping_address.line_1
+        assert res[i].shipping_address.address_line >= res[i + 1].shipping_address.address_line
 
 
 def test_multiple(db: Session) -> None:

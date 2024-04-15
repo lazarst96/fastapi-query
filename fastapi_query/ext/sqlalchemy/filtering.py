@@ -89,7 +89,6 @@ def _get_orm_filters(
         model_class: Any,
         filters: BaseFilterParams
 ) -> List[Any]:
-    columns: Dict[str, Column] = dict(inspect(model_class).columns)
     relationships: Dict[str, Relationship] = dict(inspect(model_class).relationships)
 
     res = []
@@ -117,10 +116,6 @@ def _get_orm_filters(
             if criteria is not None:
                 res.append(criteria)
 
-        elif field_name in columns:
-            model_field = getattr(model_class, field_name)
-            res.append(getattr(model_field, operator)(value))
-
         elif (
                 isinstance(value, dict) and
                 field_name in relationships and
@@ -142,6 +137,10 @@ def _get_orm_filters(
                 res.append(
                     model_field.has(and_(*nested_orm_filters))
                 )
+
+        elif hasattr(model_class, field_name):
+            model_field = getattr(model_class, field_name)
+            res.append(getattr(model_field, operator)(value))
 
         elif value:
             raise ValueError(
